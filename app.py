@@ -21,7 +21,6 @@ with st.form("finance_form"):
     costs = st.number_input("Costs")
     f_rev = st.number_imput("Forecast Revenue")
     f_costs = st.number_imput("Forecast Costs")
-    
     submitted = st.form_submit_button("Submit")
 
 if submitted:
@@ -41,7 +40,7 @@ if submitted:
         "rev_br_eur": rev_br_eur,
         "costs": costs,
         "f_rev": f_rev,
-        "f_costs": f_costs
+        "f_costs": f_costs 
     }
 
     response = supabase.table("financial_metrics").upsert(data).execute()
