@@ -23,6 +23,10 @@ with st.form("finance_form"):
     submitted = st.form_submit_button("Submit")
 
 if submitted:
+    if month_year.strip() == "":
+        st.error("Month (YYYY-MM) cannot be empty.")
+        st.stop()
+
     # UPSERT
     data = {
         "month_year": month_year,
