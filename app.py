@@ -19,6 +19,8 @@ with st.form("finance_form"):
     rev_br = st.number_input("Revenue Brazil Local")
     rev_br_eur = st.number_input("Revenue Brazil EUR")
     costs = st.number_input("Costs")
+    f_rev = st.number_imput("Forecast Revenue")
+    f_costs = st.number_imput("Forecast Costs")
     
     submitted = st.form_submit_button("Submit")
 
@@ -37,7 +39,9 @@ if submitted:
         "rev_cl_eur": rev_cl_eur,
         "rev_br": rev_br,
         "rev_br_eur": rev_br_eur,
-        "costs": costs
+        "costs": costs,
+        "f_rev": f_rev,
+        "f_costs": f_costs
     }
 
     response = supabase.table("financial_metrics").upsert(data).execute()
