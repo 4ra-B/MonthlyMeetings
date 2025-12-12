@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from supabase_client import get_supabase
-from charts import chart_last_month, chart_last_12, chart_natural_year, chart_growth
+from charts import chart_last_month, chart_natural_year, chart_revenue_per_country
 
 st.title("Financial Metrics – Admin Panel")
 
