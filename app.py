@@ -67,5 +67,5 @@ if len(df) > 0:
     st.download_button("Download PNG", chart_natural_year(df_nat), "natural_year.png")
 
     # Revenue
-    st.subheader("% Growth")
+    st.subheader("Revenue per Country")
     st.download_button("Download PNG", chart_revenue_per_country(df_last12), "growth.png")
