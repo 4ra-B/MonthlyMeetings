@@ -143,35 +143,38 @@ def chart_natural_year(df):
 # ================================================================
 def chart_revenue_per_country(df):
     df = df.copy()
-    df["month_year"] = pd.to_datetime(df["month_year"])
-    df_sorted = df.sort_values("month_year")
+    df['month_year'] = pd.to_datetime(df['month_year'], format='%Y-%m')
 
-    latest_month_id = df_sorted["month_id"].max()
-    df_last12 = df_sorted[df_sorted["month_id"] > latest_month_id - 12]
+# Sort the DataFrame by month_year to ensure correct chronological order
+df_sorted = df.sort_values(by='month_year', ascending=True)
 
-    palette = ["#1C91DD", "#e36e22", "#22AD5C", "#949494", "#178949"]
+# Get the latest month_id
+latest_month_id = df_sorted['month_id'].max()
 
-    fig, ax = plt.subplots(figsize=(18, 8))
+# Filter for the last 12 months, or all available if less than 12
+if latest_month_id >= 12:
+    df_last_12_months = df_sorted[df_sorted['month_id'] > (latest_month_id - 12)].copy()
+else:
+    df_last_12_months = df_sorted.copy()
 
-    x = range(len(df_last12))
-    bw = 0.15
+# Colors
+palette = [
+    "#1C91DD",
+    "#e36e22",
+    "#22AD5C"]
 
-    # Spain (stacked)
-    ax.bar([i - bw for i in x], df_last12["rev_sp_saas"], bw, color=palette[0], label="España SaaS")
-    ax.bar([i - bw for i in x], df_last12["rev_sp_h"],   bw, bottom=df_last12["rev_sp_saas"], color=palette[1], label="España H")
-    ax.bar([i - bw for i in x], df_last12["rev_sp_o"],   bw, bottom=df_last12["rev_sp_saas"] + df_last12["rev_sp_h"], color=palette[2], label="España O")
+plt.figure(figsize=(18, 8))
 
-    ax.bar([i for i in x], df_last12["rev_cl_eur"], bw, color=palette[3], label="Chile")
-    ax.bar([i + bw for i in x], df_last12["rev_br_eur"], bw, color=palette[4], label="Brasil")
+# Plotting each country's revenue as lines
+plt.plot(df_last_12_months['month_year'], df_last_12_months['rev_sp_saas'], label='España (SaaS)', marker='o', color=palette[0])
+plt.plot(df_last_12_months['month_year'], df_last_12_months['rev_cl_eur'], label='Chile', marker='o', color=palette[1])
+plt.plot(df_last_12_months['month_year'], df_last_12_months['rev_br_eur'], label='Brasil', marker='o', color=palette[2])
 
-    ax.set_title("Ingresos por País (Últimos 12 Meses)")
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("Ingresos (€)")
-    ax.set_xticks(x)
-    ax.set_xticklabels(df_last12["month_year"].dt.strftime("%Y-%m"), rotation=45)
-
-    ax.grid(True, linestyle="--", alpha=0.7)
-    ax.legend()
-
-    plt.tight_layout()
+plt.title('Ingresos por País en Euros (Últimos 12 Meses)')
+plt.xlabel('Mes')
+plt.ylabel('Ingreso en Euros')
+plt.xticks(df_last_12_months['month_year'], df_last_12_months['month_year'].dt.strftime('%Y-%m'), rotation=45, ha='right')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.legend(loc='upper left', bbox_to_anchor=(1,1))
+plt.tight_layout()
     return fig_to_bytes(fig)
