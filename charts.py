@@ -1,117 +1,177 @@
 import io
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-# ------------------------------
-# Utility: Convert matplotlib fig to bytes
-# ------------------------------
+
+# ------------------------------------
+# Utilidad: convertir figura a bytes
+# ------------------------------------
 def fig_to_bytes(fig):
     buf = io.BytesIO()
     fig.savefig(buf, format="png", bbox_inches="tight")
     buf.seek(0)
     return buf
 
-# ------------------------------
-# 1) Last Month Chart
-# ------------------------------
+
+# ================================================================
+# 1) LAST MONTH — REAL VS FORECAST
+# ================================================================
 def chart_last_month(df):
-    latest_month_id = df['month_id'].max()
-    df_latest_month = df[df['month_id'] == latest_month_id]
+    latest_month_id = df["month_id"].max()
+    df_latest = df[df["month_id"] == latest_month_id]
 
-    total_revenue = df_latest_month[['rev_sp_saas', 'rev_sp_h', 'rev_sp_o', 'rev_cl_eur', 'rev_br_eur']].sum().sum()
-    total_costs = df_latest_month['costs'].iloc[0]
-    profit_loss = total_revenue - total_costs
+    # Real values
+    real_rev = df_latest[['rev_sp_saas','rev_sp_h','rev_sp_o','rev_cl_eur','rev_br_eur']].sum().sum()
+    real_costs = df_latest["costs"].iloc[0]
+    real_ebitdac = real_rev - real_costs
 
-    fig, ax = plt.subplots(figsize=(12, 5))
+    # Forecast
+    f_rev = df_latest["f_rev"].iloc[0]
+    f_costs = df_latest["f_costs"].iloc[0]
+    f_ebitdac = f_rev - f_costs
 
-    # Revenue bar
-    ax.barh(1.5, total_revenue)
-    ax.text(total_revenue, 1.5, f"{total_revenue:,.2f}")
+    palette = ["#1C91DD", "#949494", "#22AD5C"]
 
-    # Costs + Profit bar
-    if profit_loss >= 0:
-        ax.barh(0.5, total_costs, color='red')
-        ax.barh(0.5, profit_loss, left=total_costs, color='green')
-        ax.text(total_costs / 2, 0.5, f"{total_costs:,.2f}", ha="center")
-        ax.text(total_costs + profit_loss / 2, 0.5, f"{profit_loss:,.2f}", ha="center")
+    fig, ax = plt.subplots(figsize=(15, 7))
+
+    # Real revenue
+    ax.barh(2, real_rev, height=0.6, color=palette[0])
+    ax.text(real_rev, 2, f" {real_rev:,.2f}")
+
+    # Real costs + EBITDAC
+    if real_ebitdac >= 0:
+        ax.barh(1, real_costs, height=0.6, color=palette[1])
+        ax.barh(1, real_ebitdac, height=0.6, left=real_costs, color=palette[2])
+
+        ax.text(real_costs / 2, 1, f"{real_costs:,.2f}", ha="center")
+        ax.text(real_costs + real_ebitdac / 2, 1, f"{real_ebitdac:,.2f}", ha="center", color="white")
     else:
-        ax.barh(0.5, total_costs, color='red')
-        ax.text(total_costs, 0.5, f"{total_costs:,.2f}")
-        text_x = total_revenue + (total_costs - total_revenue) / 2
-        ax.text(text_x, 1.0, f"Loss: {abs(profit_loss):,.2f}")
+        ax.barh(1, real_costs, height=0.6, color=palette[2])
+        ax.text(real_costs, 1, f"{real_costs:,.2f}")
 
-    ax.set_yticks([0.5, 1.5])
-    ax.set_yticklabels(['Costs & EBITDAC', 'Total Revenue'])
-    ax.set_title("Financial Performance – Last Month")
-    plt.grid(axis="x", linestyle="--", alpha=0.7)
+    # Forecast revenue
+    ax.barh(0, f_rev, height=0.6, color=palette[0])
+    ax.text(f_rev, 0, f" {f_rev:,.2f}")
 
-    return fig_to_bytes(fig)
+    # Forecast costs + EBITDAC
+    if f_ebitdac >= 0:
+        ax.barh(-1, f_costs, height=0.6, color=palette[1])
+        ax.barh(-1, f_ebitdac, height=0.6, left=f_costs, color=palette[2])
 
-# ------------------------------
-# 2) Last 12 months Chart
-# ------------------------------
-def chart_last_12(df):
-    df = df.copy()
-    total_rev = df[['rev_sp_saas', 'rev_sp_h', 'rev_sp_o', 'rev_cl_eur', 'rev_br_eur']].sum().sum()
-    total_costs = df['costs'].sum()
-    profit_loss = total_rev - total_costs
+        ax.text(f_costs / 2, -1, f"{f_costs:,.2f}", ha="center")
+        ax.text(f_costs + f_ebitdac / 2, -1, f"{f_ebitdac:,.2f}", ha="center", color="white")
+    else:
+        ax.barh(-1, f_costs, height=0.6, color=palette[1])
+        ax.text(f_costs, -1, f" {f_costs:,.2f}")
 
-    fig, ax = plt.subplots(figsize=(12, 5))
-    ax.barh(1.5, total_rev)
-    ax.barh(0.5, total_costs, color='red')
-    if profit_loss >= 0:
-        ax.barh(0.5, profit_loss, left=total_costs, color='green')
+    ax.set_yticks([-1, 0, 1, 2])
+    ax.set_yticklabels(["F Costs & EBITDAC", "F Revenue", "R Costs & EBITDAC", "R Revenue"])
 
-    ax.set_yticks([0.5, 1.5])
-    ax.set_yticklabels(['Costs & EBITDAC', 'Total Revenue'])
-    ax.set_title("Financial Performance – Last 12 Months")
-    plt.grid(axis="x", linestyle="--", alpha=0.7)
+    ax.set_title("Financial Performance – Last Month (Real vs Forecast)")
+    ax.set_xlabel("Amount")
+
+    max_x = max(real_rev, f_rev, real_costs, f_costs) * 1.1
+    ax.set_xlim(0, max_x)
+
+    ax.grid(axis="x", linestyle="--", alpha=0.7)
+    plt.tight_layout()
 
     return fig_to_bytes(fig)
 
-# ------------------------------
-# 3) Natural Year Chart
-# ------------------------------
+
+# ================================================================
+# 2) NATURAL YEAR — REAL VS FORECAST
+# ================================================================
 def chart_natural_year(df):
-    fig, ax = plt.subplots(figsize=(12, 5))
+    df = df.copy()
+    df["month_year"] = pd.to_datetime(df["month_year"])
 
-    total_rev = df[['rev_sp_saas', 'rev_sp_h', 'rev_sp_o', 'rev_cl_eur', 'rev_br_eur']].sum().sum()
-    total_costs = df['costs'].sum()
-    profit_loss = total_rev - total_costs
+    df_sorted = df.sort_values("month_year")
+    latest_month = df_sorted["month_year"].max()
 
-    ax.barh(1.5, total_rev)
-    ax.barh(0.5, total_costs, color='red')
-    if profit_loss >= 0:
-        ax.barh(0.5, profit_loss, left=total_costs, color='green')
+    start_year = pd.to_datetime(f"{latest_month.year}-01-01")
+    df_nat = df_sorted[df_sorted["month_year"] >= start_year]
 
-    ax.set_yticks([0.5, 1.5])
-    ax.set_yticklabels(['Costs & EBITDAC', 'Total Revenue'])
-    ax.set_title("Financial Performance – Natural Year")
-    plt.grid(axis="x", linestyle="--", alpha=0.7)
+    real_rev = df_nat[['rev_sp_saas','rev_sp_h','rev_sp_o','rev_cl_eur','rev_br_eur']].sum().sum()
+    real_costs = df_nat["costs"].sum()
+    real_ebitdac = real_rev - real_costs
+
+    f_rev = df_nat["f_rev"].sum()
+    f_costs = df_nat["f_costs"].sum()
+    f_ebitdac = f_rev - f_costs
+
+    palette = ["#1C91DD", "#949494", "#22AD5C"]
+
+    fig, ax = plt.subplots(figsize=(15, 7))
+
+    ax.barh(2, real_rev, height=0.6, color=palette[0])
+    ax.text(real_rev, 2, f" {real_rev:,.2f}")
+
+    if real_ebitdac >= 0:
+        ax.barh(1, real_costs, height=0.6, color=palette[1])
+        ax.barh(1, real_ebitdac, height=0.6, left=real_costs, color=palette[2])
+    else:
+        ax.barh(1, real_costs, height=0.6, color=palette[2])
+
+    ax.barh(0, f_rev, height=0.6, color=palette[0])
+    ax.text(f_rev, 0, f" {f_rev:,.2f}")
+
+    if f_ebitdac >= 0:
+        ax.barh(-1, f_costs, height=0.6, color=palette[1])
+        ax.barh(-1, f_ebitdac, height=0.6, left=f_costs, color=palette[2])
+    else:
+        ax.barh(-1, f_costs, height=0.6, color=palette[1])
+
+    ax.set_yticks([-1, 0, 1, 2])
+    ax.set_yticklabels(["F Costs & EBITDAC", "F Revenue", "R Costs & EBITDAC", "R Revenue"])
+
+    ax.set_title("Financial Performance – Natural Year (Real vs Forecast)")
+    ax.set_xlabel("Amount")
+
+    max_x = max(real_rev, f_rev, real_costs, f_costs) * 1.1
+    ax.set_xlim(0, max_x)
+
+    ax.grid(axis="x", linestyle="--", alpha=0.7)
+    plt.tight_layout()
 
     return fig_to_bytes(fig)
 
-# ------------------------------
-# 4) % Growth Chart
-# ------------------------------
-def chart_growth(df_last12):
-    df = df_last12.sort_values("month_year").copy()
 
-    df['rev_sp_saas_growth'] = df['rev_sp_saas'].pct_change() * 100
-    df['rev_cl_growth'] = df['rev_cl'].pct_change() * 100
-    df['rev_br_growth'] = df['rev_br'].pct_change() * 100
+# ================================================================
+# 3) SaaS Revenue per Country (Últimos 12 meses)
+# ================================================================
+def chart_revenue_per_country(df):
+    df = df.copy()
+    df["month_year"] = pd.to_datetime(df["month_year"])
+    df_sorted = df.sort_values("month_year")
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    latest_month_id = df_sorted["month_id"].max()
+    df_last12 = df_sorted[df_sorted["month_id"] > latest_month_id - 12]
 
-    ax.plot(df['month_year'], df['rev_sp_saas_growth'], marker='o', label='Spain')
-    ax.plot(df['month_year'], df['rev_cl_growth'], marker='o', label='Chile')
-    ax.plot(df['month_year'], df['rev_br_growth'], marker='o', label='Brazil')
+    palette = ["#1C91DD", "#e36e22", "#22AD5C", "#949494", "#178949"]
 
-    ax.axhline(0, linestyle='--')
-    ax.set_title("Revenue Growth % – Last 12 Months")
-    ax.set_ylabel("Growth %")
-    plt.xticks(rotation=45)
-    plt.grid(True, linestyle="--", alpha=0.7)
-    plt.legend()
+    fig, ax = plt.subplots(figsize=(18, 8))
 
+    x = range(len(df_last12))
+    bw = 0.15
+
+    # Spain (stacked)
+    ax.bar([i - bw for i in x], df_last12["rev_sp_saas"], bw, color=palette[0], label="España SaaS")
+    ax.bar([i - bw for i in x], df_last12["rev_sp_h"],   bw, bottom=df_last12["rev_sp_saas"], color=palette[1], label="España H")
+    ax.bar([i - bw for i in x], df_last12["rev_sp_o"],   bw, bottom=df_last12["rev_sp_saas"] + df_last12["rev_sp_h"], color=palette[2], label="España O")
+
+    ax.bar([i for i in x], df_last12["rev_cl_eur"], bw, color=palette[3], label="Chile")
+    ax.bar([i + bw for i in x], df_last12["rev_br_eur"], bw, color=palette[4], label="Brasil")
+
+    ax.set_title("Ingresos por País (Últimos 12 Meses)")
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Ingresos (€)")
+    ax.set_xticks(x)
+    ax.set_xticklabels(df_last12["month_year"].dt.strftime("%Y-%m"), rotation=45)
+
+    ax.grid(True, linestyle="--", alpha=0.7)
+    ax.legend()
+
+    plt.tight_layout()
     return fig_to_bytes(fig)
