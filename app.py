@@ -68,4 +68,4 @@ if len(df) > 0:
 
     # Revenue
     st.subheader("Revenue per Country")
-    st.download_button("Download PNG", chart_revenue_per_country(df_last12), "growth.png")
+    st.download_button("Download PNG", chart_revenue_per_country(df_last12), "revenue.png")
