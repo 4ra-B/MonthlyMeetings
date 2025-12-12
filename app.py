@@ -68,6 +68,7 @@ if len(df) > 0:
 
     # Revenue
     st.subheader("Revenue per Country")
+    df_sorted = df.sort_values("month_year")
     latest_month_id = df_sorted["month_id"].max()
     df_last12 = df_sorted[df_sorted["month_id"] > latest_month_id - 12]
     st.download_button("Download PNG", chart_revenue_per_country(df_last12), "revenue.png")
