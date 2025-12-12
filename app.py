@@ -59,10 +59,6 @@ if len(df) > 0:
     st.subheader("Last Month")
     st.download_button("Download PNG", chart_last_month(df), "last_month.png")
 
-    # Last 12 months
-    st.subheader("Last 12 Months")
-    df_last12 = df[df["month_id"] > df["month_id"].max() - 12]
-    st.download_button("Download PNG", chart_last_12(df_last12), "last12.png")
 
     # Natural year
     st.subheader("Natural Year")
@@ -70,6 +66,6 @@ if len(df) > 0:
     df_nat = df[df["month_year"].str.startswith(current_year)]
     st.download_button("Download PNG", chart_natural_year(df_nat), "natural_year.png")
 
-    # Growth
+    # Revenue
     st.subheader("% Growth")
-    st.download_button("Download PNG", chart_growth(df_last12), "growth.png")
+    st.download_button("Download PNG", chart_revenue_per_country(df_last12), "growth.png")
