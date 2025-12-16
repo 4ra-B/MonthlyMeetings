@@ -8,7 +8,8 @@ Permite:
 - Insertar y actualizar datos financieros mensuales
 - Generar gráficos financieros clave
 - Descargar los gráficos en formato PNG
-- Analizar ingresos, costes y forecast por país y periodo
+- Analizar ingresos, costes y forecast por periodo
+- Analizar ingresos por país
 
 Stack Tecnológico
 - Python 3.10+
