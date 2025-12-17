@@ -43,7 +43,7 @@ def chart_last_month(df):
     # REAL REVENUE
     # ==================================================
     ax.barh(2, real_rev, height=0.6, color=palette[0])
-    ax.text(real_rev, 2, f" {real_rev:,.2f}", va="center")  # ⬅️ etiqueta real_rev
+    ax.text(real_rev, 2, f" {real_rev:,.2f}", va="center")
 
     # ==================================================
     # REAL COSTS & EBITDAC
@@ -51,8 +51,6 @@ def chart_last_month(df):
     if real_ebitdac >= 0:
         ax.barh(1, real_costs, height=0.6, color=palette[1])
         ax.barh(1, real_ebitdac, left=real_costs, height=0.6, color=palette[2])
-
-        # ⬅️ etiqueta real_costs (centrada)
         ax.text(
             real_costs / 2,
             1,
@@ -60,8 +58,6 @@ def chart_last_month(df):
             ha="center",
             va="center"
         )
-
-        # ⬅️ etiqueta real_ebitdac (centrada sobre el tramo verde)
         ax.text(
             real_costs + real_ebitdac / 2,
             1,
@@ -72,13 +68,13 @@ def chart_last_month(df):
         )
     else:
         ax.barh(1, real_costs, height=0.6, color=palette[1])
-        ax.text(real_costs, 1, f" {real_costs:,.2f}", va="center")  # ⬅️
+        ax.text(real_costs, 1, f" {real_costs:,.2f}", va="center")
 
     # ==================================================
     # FORECAST REVENUE
     # ==================================================
     ax.barh(0, f_rev, height=0.6, color=palette[0])
-    ax.text(f_rev, 0, f" {f_rev:,.2f}", va="center")  # ⬅️ etiqueta f_rev
+    ax.text(f_rev, 0, f" {f_rev:,.2f}", va="center")
 
     # ==================================================
     # FORECAST COSTS & EBITDAC
@@ -86,8 +82,6 @@ def chart_last_month(df):
     if f_ebitdac >= 0:
         ax.barh(-1, f_costs, height=0.6, color=palette[1])
         ax.barh(-1, f_ebitdac, left=f_costs, height=0.6, color=palette[2])
-
-        # ⬅️ etiqueta f_costs
         ax.text(
             f_costs / 2,
             -1,
@@ -95,8 +89,6 @@ def chart_last_month(df):
             ha="center",
             va="center"
         )
-
-        # ⬅️ etiqueta f_ebitdac
         ax.text(
             f_costs + f_ebitdac / 2,
             -1,
@@ -107,7 +99,7 @@ def chart_last_month(df):
         )
     else:
         ax.barh(-1, f_costs, height=0.6, color=palette[1])
-        ax.text(f_costs, -1, f" {f_costs:,.2f}", va="center")  # ⬅️
+        ax.text(f_costs, -1, f" {f_costs:,.2f}", va="center")
 
     # ==================================================
     # AXES & LAYOUT
