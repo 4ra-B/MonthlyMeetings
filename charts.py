@@ -37,25 +37,60 @@ def chart_last_month(df):
 
     # Real revenue
     ax.barh(2, real_rev, height=0.6, color=palette[0])
-    ax.text(real_rev, 2, f" {real_rev:,.2f}")
+    ax.text(real_rev, 2, f" {real_rev:,.2f}", va="center")
 
     # Real costs & EBITDAC
     if real_ebitdac >= 0:
         ax.barh(1, real_costs, height=0.6, color=palette[1])
         ax.barh(1, real_ebitdac, left=real_costs, height=0.6, color=palette[2])
+        ax.text(
+            real_costs / 2,
+            1,
+            f"{real_costs:,.2f}",
+            ha="center",
+            va="center"
+        )
+        ax.text(
+            real_costs + real_ebitdac / 2,
+            1,
+            f"{real_ebitdac:,.2f}",
+            ha="center",
+            va="center",
+            color="white"
+        )
     else:
         ax.barh(1, real_costs, height=0.6, color=palette[1])
+        ax.text(real_costs, 1, f" {real_costs:,.2f}", va="center") 
+        
 
     # Forecast revenue
     ax.barh(0, f_rev, height=0.6, color=palette[0])
-    ax.text(f_rev, 0, f" {f_rev:,.2f}")
+    ax.text(f_rev, 0, f" {f_rev:,.2f}", va="center")
 
     # Forecast costs & EBITDAC
     if f_ebitdac >= 0:
         ax.barh(-1, f_costs, height=0.6, color=palette[1])
         ax.barh(-1, f_ebitdac, left=f_costs, height=0.6, color=palette[2])
+    ax.text(
+            f_costs / 2,
+            -1,
+            f"{f_costs:,.2f}",
+            ha="center",
+            va="center"
+        )
+
+        # ⬅️ etiqueta f_ebitdac
+        ax.text(
+            f_costs + f_ebitdac / 2,
+            -1,
+            f"{f_ebitdac:,.2f}",
+            ha="center",
+            va="center",
+            color="white"
+        )
     else:
         ax.barh(-1, f_costs, height=0.6, color=palette[1])
+        ax.text(f_costs, -1, f" {f_costs:,.2f}", va="center")
 
     ax.set_yticks([-1, 0, 1, 2])
     ax.set_yticklabels(
@@ -75,6 +110,9 @@ def chart_last_month(df):
 # 2) NATURAL YEAR — REAL VS FORECAST
 # ==================================================
 def chart_natural_year(df):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
     df = df.copy()
     df["month_year"] = pd.to_datetime(df["month_year"], errors="coerce")
 
@@ -84,12 +122,14 @@ def chart_natural_year(df):
 
     df_nat = df_sorted[df_sorted["month_year"] >= start_year]
 
+    # Real
     real_rev = df_nat[
         ["rev_sp_saas", "rev_sp_h", "rev_sp_o", "rev_cl_eur", "rev_br_eur"]
     ].sum().sum()
     real_costs = df_nat["costs"].sum()
     real_ebitdac = real_rev - real_costs
 
+    # Forecast
     f_rev = df_nat.get("f_rev", pd.Series(0)).sum()
     f_costs = df_nat.get("f_costs", pd.Series(0)).sum()
     f_ebitdac = f_rev - f_costs
@@ -98,16 +138,67 @@ def chart_natural_year(df):
 
     fig, ax = plt.subplots(figsize=(15, 7))
 
+    # -----------------
+    # Real Revenue
+    # -----------------
     ax.barh(2, real_rev, height=0.6, color=palette[0])
+    ax.text(real_rev, 2, f"{real_rev:,.2f}", va="center")
+
+    # -----------------
+    # Real Costs & EBITDAC
+    # -----------------
     ax.barh(1, real_costs, height=0.6, color=palette[1])
+    ax.text(
+        real_costs / 2,
+        1,
+        f"{real_costs:,.2f}",
+        ha="center",
+        va="center"
+    )
+
     if real_ebitdac > 0:
         ax.barh(1, real_ebitdac, left=real_costs, height=0.6, color=palette[2])
+        ax.text(
+            real_costs + real_ebitdac / 2,
+            1,
+            f"{real_ebitdac:,.2f}",
+            ha="center",
+            va="center",
+            color="white"
+        )
 
+    # -----------------
+    # Forecast Revenue
+    # -----------------
     ax.barh(0, f_rev, height=0.6, color=palette[0])
+    ax.text(f_rev, 0, f"{f_rev:,.2f}", va="center")
+
+    # -----------------
+    # Forecast Costs & EBITDAC
+    # -----------------
     ax.barh(-1, f_costs, height=0.6, color=palette[1])
+    ax.text(
+        f_costs / 2,
+        -1,
+        f"{f_costs:,.2f}",
+        ha="center",
+        va="center"
+    )
+
     if f_ebitdac > 0:
         ax.barh(-1, f_ebitdac, left=f_costs, height=0.6, color=palette[2])
+        ax.text(
+            f_costs + f_ebitdac / 2,
+            -1,
+            f"{f_ebitdac:,.2f}",
+            ha="center",
+            va="center",
+            color="white"
+        )
 
+    # -----------------
+    # Axes & layout
+    # -----------------
     ax.set_yticks([-1, 0, 1, 2])
     ax.set_yticklabels(
         ["F Costs & EBITDAC", "F Revenue", "R Costs & EBITDAC", "R Revenue"]
